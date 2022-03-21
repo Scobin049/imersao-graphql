@@ -1,9 +1,9 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { Link } from 'react-router-dom';
-import {Container as ContainerDetail } from '@material-ui/core';
+import {CircularProgress, Container as ContainerDetail } from '@material-ui/core';
 
 import BoxOptions from './BoxOptions';
-import { IBoxOptions } from './types';
+import { IBoxOptions, IGetCount } from './types';
 import { Container, Content, Box, Logo, Details, BoxDetails } from './styles';
 
 import logo from '../../assets/logo.png';
@@ -11,28 +11,59 @@ import locations from '../../assets/locations.jpg';
 import episodes from '../../assets/episodes.jpg';
 import characters from '../../assets/characters.png';
 import imersaoGraphQL from '../../assets/imersao-graphql.png';
+import { gql, useQuery } from '@apollo/client';
 
 const Home: React.FC = () => {
-  const optionsList:IBoxOptions[] = [
+  const GET_COUNTS = gql`
+  query GetCounts {
+    characters {
+      info {
+        count
+      }
+    }
+    locations {
+      info {
+        count
+      }
+    }
+    episodes {
+      info {
+        count
+      }
+    }
+  }
+`;
+  const [optionsList, setOptionsList] = useState<IBoxOptions[]>([
     {
       title: "Locais",
-      count: 10,
+      count: 0,
       image: locations,
       link: "locations"
     },
     {
       title: "Episódios",
-      count: 32,
+      count: 0,
       image: episodes,
       link: "episodes"
     },
     {
       title: "Personagens",
-      count: 88,
+      count: 0,
       image: characters,
       link: "characters"
     }
-  ]
+  ])
+
+  const { loading, error, data } = useQuery<IGetCount>(GET_COUNTS);
+
+  useEffect(() => {
+    if(!data) return ;
+    const newList = [...optionsList]
+    newList[0].count = data.locations.info.count
+    newList[1].count = data.episodes.info.count
+    newList[2].count = data.characters.info.count
+    setOptionsList(newList)
+  },[data])
 
   return <>
     <Container>
@@ -55,15 +86,19 @@ const Home: React.FC = () => {
     </ContainerDetail>
 
     <ContainerDetail maxWidth="lg">
-      <Details>      
-        {optionsList.map(item => (
-          <BoxDetails>
-            <Link to={item.link}>
-              <BoxOptions item={item}/>
-            </Link>
-          </BoxDetails>
-        ))}
-      </Details>
+      {loading ?
+        <CircularProgress/>
+      :
+        <Details>      
+          {optionsList.map(item => (
+            <BoxDetails>
+              <Link to={item.link}>
+                <BoxOptions item={item}/>
+              </Link>
+            </BoxDetails>
+          ))}
+        </Details>
+      }
     </ContainerDetail>
   </>
 }
