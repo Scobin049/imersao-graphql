@@ -1,11 +1,12 @@
 import { useLazyQuery } from '@apollo/client';
-import { Button, CircularProgress, Container, Dialog, DialogContent, Grid, TextField, Typography } from '@material-ui/core';
+import { Button, CircularProgress, Container, Dialog, Grid, TextField, Typography } from '@material-ui/core';
 import React, { useEffect, useState } from 'react';
+import ViewError from '../../components/ViewError';
 import { IFilter } from '../../utils/types';
 import { GET_CHARACTER, GET_CHARACTERS_FILTER } from './query';
 
 import { ContentBox, ModalDetails } from './styles';
-import { IGetCharacter, IGetCharactersList } from './types';
+import { IGetCharacter, IGetCharactersList, IGetCharacterFilter } from './types';
 
 const Characters: React.FC = () => {
   const [text, setText] = useState("")
@@ -29,14 +30,8 @@ const Characters: React.FC = () => {
   
   const [
     getCharacter, {loading: loadingChar, error: errorChar, data: dataChar}
-  ] = useLazyQuery<IGetCharacter>(GET_CHARACTER)
+  ] = useLazyQuery<IGetCharacter, IGetCharacterFilter>(GET_CHARACTER)
   
-  
-  if(error) {
-    return <Container maxWidth="lg">
-      <Typography variant='h4'>{error.message}</Typography>
-    </Container>
-  }
   return <Container maxWidth="lg">
     <Typography variant='h2'>Personagens</Typography>
     <div style={{ display:'flex' }}>
@@ -76,9 +71,11 @@ const Characters: React.FC = () => {
       </div>
     </div>
     <Grid container>
-      {loading?
-      <CircularProgress/>:
-      data?.characters.results.map(item => (
+      {loading && <CircularProgress/> }
+
+      {error && <ViewError>{error.message}</ViewError>}
+
+      {data?.characters.results.map(item => (
         <Grid item xs={12} sm={6} md={4} style={{padding: 8}}>
         <ContentBox onClick={() => {
           getCharacter({variables: {characterId: item.id}});
@@ -95,23 +92,30 @@ const Characters: React.FC = () => {
     </Grid>
     <Dialog onClose={handleClose} aria-labelledby="simple-dialog-title" open={open}>
       <ModalDetails>
-        {loadingChar ?? <CircularProgress/>}
-        <img alt={dataChar?.character.name} src={dataChar?.character.image}/>
-        <Typography variant='h4'>{dataChar?.character.name}</Typography>
-        <br/>
-        <div>
-          <Typography variant='h6'>Status: {dataChar?.character.status}</Typography>
-          <Typography variant='h6'>Gênero: {dataChar?.character.gender}</Typography>
-          <Typography variant='h6'>Espécie: {dataChar?.character.species}</Typography>
-          <Typography variant='h6'>Tipo: {dataChar?.character.type}</Typography>
-        </div>
-        <br/>
-        <div>
-          <Typography variant='h5'>Origem</Typography>
-          <Typography variant='h6'>Nome: {dataChar?.character.origin.name}</Typography>
-          <Typography variant='h6'>Tipo: {dataChar?.character.origin.type}</Typography>
-          <Typography variant='h6'>Dimensão: {dataChar?.character.origin.dimension}</Typography>
-        </div>
+        {loadingChar ?? <CircularProgress/>}  
+
+        {errorChar && <Typography variant='h4'>{errorChar.message}</Typography>}
+        
+        {dataChar && (
+          <>
+            <img alt={dataChar.character.name} src={dataChar.character.image}/>
+            <Typography variant='h4'>{dataChar.character.name}</Typography>
+            <br/>
+            <div>
+              <Typography variant='h6'>Status: {dataChar.character.status}</Typography>
+              <Typography variant='h6'>Gênero: {dataChar.character.gender}</Typography>
+              <Typography variant='h6'>Espécie: {dataChar.character.species}</Typography>
+              <Typography variant='h6'>Tipo: {dataChar.character.type}</Typography>
+            </div>
+            <br/>
+            <div>
+              <Typography variant='h5'>Origem</Typography>
+              <Typography variant='h6'>Nome: {dataChar.character.origin.name}</Typography>
+              <Typography variant='h6'>Tipo: {dataChar.character.origin.type}</Typography>
+              <Typography variant='h6'>Dimensão: {dataChar.character.origin.dimension}</Typography>
+            </div>
+          </>
+        )}
       </ModalDetails>
     </Dialog>
   </Container>

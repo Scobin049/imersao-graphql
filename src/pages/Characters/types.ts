@@ -29,3 +29,7 @@ export interface ICharacterItem extends IAuxCharacter {
 export interface IGetCharacter {
     character: ICharacterItem
 }
+
+export interface IGetCharacterFilter {
+    characterId: string;
+}
