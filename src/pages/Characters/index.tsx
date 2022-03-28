@@ -94,7 +94,7 @@ const Characters: React.FC = () => {
       <ModalDetails>
         {loadingChar ?? <CircularProgress/>}  
 
-        {errorChar && <Typography variant='h4'>{errorChar.message}</Typography>}
+        {errorChar && <ViewError>{errorChar.message}</ViewError>}
         
         {dataChar && (
           <>

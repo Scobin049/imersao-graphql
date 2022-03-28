@@ -20,7 +20,7 @@ const Locations: React.FC = () => {
 
   const [
     getLocationsFilter, { loading, error, data }
-  ] = useLazyQuery<IGetLocations,IFilter>(GET_LOCATIONS_FILTER)
+  ] = useLazyQuery<IGetLocations, IFilter>(GET_LOCATIONS_FILTER)
 
   const [
     getLocation, { loading: locationLoading, error: locationError, data: locationData }
@@ -33,8 +33,6 @@ const Locations: React.FC = () => {
   const handleClose = () => {
     setOpen(false);
   };
-
-  console.log('data',data)
 
   return <>   
     <Container maxWidth="lg">
